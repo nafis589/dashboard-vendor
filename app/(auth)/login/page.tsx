@@ -149,7 +149,7 @@ export default function LoginPage() {
               href="/register"
               className="text-[#1A1A1A] underline underline-offset-2 transition-opacity hover:opacity-70"
             >
-              Pas encore vendeur ? Créer un compte
+              Créer un compte vendeur
             </Link>
           </p>
           <p>

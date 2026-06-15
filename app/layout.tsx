@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${playfair.variable} h-full`}>
-      <body className="min-h-full font-sans antialiased text-[#1A1A1A]">
+      <body className="min-h-full font-sans antialiased">
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

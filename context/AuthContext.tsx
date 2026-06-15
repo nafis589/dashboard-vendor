@@ -21,7 +21,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:9000';
 
 async function fetchVendorProfile(accessToken: string): Promise<VendorUser> {
   const res = await fetch(`${BASE_URL}/api/vendor/profile`, {
@@ -85,6 +85,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const vendorProfile = await fetchVendorProfile(data.accessToken);
+
+      if (vendorProfile.status === 'PENDING') {
+        throw new Error(
+          'Votre compte est en cours de validation par l\'administrateur.',
+        );
+      }
+      if (vendorProfile.status === 'SUSPENDED') {
+        throw new Error('Votre compte a été suspendu. Contactez le support.');
+      }
 
       setToken(data.accessToken);
       setTokenState(data.accessToken);

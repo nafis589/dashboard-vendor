@@ -16,6 +16,8 @@ export interface LocationValidationResult {
   lng: number;
   isInTogo: boolean;
   region?: { id: string; name: string; capital: string };
+  /** Set when the API call failed (network / server), not when coords are outside Togo */
+  validationError?: boolean;
 }
 
 interface RegisterLocationMapProps {
@@ -72,7 +74,7 @@ export default function RegisterLocationMap({
         );
         onLocationValidated({ lat, lng, isInTogo: data.isInTogo, region: data.region });
       } catch {
-        onLocationValidated({ lat, lng, isInTogo: false });
+        onLocationValidated({ lat, lng, isInTogo: false, validationError: true });
       } finally {
         onValidatingChange?.(false);
       }

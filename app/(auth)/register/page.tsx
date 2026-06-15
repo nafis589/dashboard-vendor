@@ -240,6 +240,14 @@ export default function RegisterPage() {
                       <Loader2 size={16} className="animate-spin text-[#1A1A1A]" />
                       Vérification de la localisation…
                     </div>
+                  ) : location?.validationError ? (
+                    <div className="flex items-start gap-2 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+                      <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                      <span>
+                        Impossible de vérifier la position. Vérifiez que le backend tourne sur le
+                        port 9000, puis réessayez.
+                      </span>
+                    </div>
                   ) : location && !location.isInTogo ? (
                     <div className="flex items-start gap-2 rounded-sm border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700">
                       <AlertCircle size={16} className="mt-0.5 shrink-0" />

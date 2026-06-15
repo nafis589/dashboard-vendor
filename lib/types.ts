@@ -63,3 +63,38 @@ export interface VendorShippingRegionInput {
   min_fee?: number;
   fixed_price?: number | null;
 }
+
+export type OrderStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'PREPARING'
+  | 'SHIPPED'
+  | 'DELIVERED'
+  | 'CANCELLED'
+  | 'RETURNED';
+
+export interface VendorOrder {
+  id: string;
+  buyer_id: string;
+  vendor_id: string;
+  status: OrderStatus;
+  total_amount: number;
+  shipping_fee: number;
+  buyer_name: string;
+  items_count: number;
+  shipping_address: {
+    first_name: string;
+    last_name: string;
+    phone: string;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VendorProduct {
+  id: string;
+  title: string;
+  stock: number;
+  status: string;
+  price: number;
+}
