@@ -52,25 +52,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {lowStockProducts.length > 0 && (
-        <Alert className="border-orange-200 bg-orange-50 text-orange-950">
-          <AlertTriangle className="text-orange-600" />
-          <AlertTitle>Stock faible</AlertTitle>
-          <AlertDescription>
-            {lowStockProducts.length} produit{lowStockProducts.length > 1 ? 's' : ''} avec un stock
-            ≤ 2 :{' '}
-            {lowStockProducts
-              .slice(0, 3)
-              .map((p) => p.title)
-              .join(', ')}
-            {lowStockProducts.length > 3 ? '…' : ''}.{' '}
-            <Link href="/products" className="font-medium underline underline-offset-2">
-              Gérer mes produits
-            </Link>
-          </AlertDescription>
-        </Alert>
-      )}
-
       <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs sm:grid-cols-2 xl:grid-cols-4">
         <TooltipProvider>
           <KpiCard
