@@ -25,7 +25,8 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ORDERS_URL, type NavGroup, type NavMainItem } from "@/config/vendor-navigation";
+import { OFFERS_URL, ORDERS_URL, type NavGroup, type NavMainItem } from "@/config/vendor-navigation";
+import { usePendingOffersCount } from "@/hooks/useOffers";
 import { usePendingOrdersCount } from "@/hooks/useOrders";
 
 interface NavMainProps {
@@ -44,18 +45,33 @@ const PendingBadge = ({ count }: { count: number }) => (
   </span>
 );
 
+function getBadgeCount(
+  url: string,
+  item: NavMainItem,
+  pendingOrders: number,
+  pendingOffers: number,
+): number {
+  if (!item.badge) return 0;
+  if (url === ORDERS_URL) return pendingOrders;
+  if (url === OFFERS_URL) return pendingOffers;
+  return 0;
+}
+
 const NavItemExpanded = ({
   item,
   isActive,
   isSubmenuOpen,
-  pendingCount,
+  pendingOrders,
+  pendingOffers,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
-  pendingCount: number;
+  pendingOrders: number;
+  pendingOffers: number;
 }) => {
-  const showBadge = item.url === ORDERS_URL && item.badge && pendingCount > 0;
+  const badgeCount = getBadgeCount(item.url, item, pendingOrders, pendingOffers);
+  const showBadge = badgeCount > 0;
 
   return (
     <Collapsible key={item.title} asChild defaultOpen={isSubmenuOpen(item.subItems)} className="group/collapsible">
@@ -83,7 +99,7 @@ const NavItemExpanded = ({
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
                 {item.comingSoon && <IsComingSoon />}
-                {showBadge && <PendingBadge count={pendingCount} />}
+                {showBadge && <PendingBadge count={badgeCount} />}
               </Link>
             </SidebarMenuButton>
           )}
@@ -113,13 +129,16 @@ const NavItemExpanded = ({
 const NavItemCollapsed = ({
   item,
   isActive,
-  pendingCount,
+  pendingOrders,
+  pendingOffers,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
-  pendingCount: number;
+  pendingOrders: number;
+  pendingOffers: number;
 }) => {
-  const showBadge = item.url === ORDERS_URL && item.badge && pendingCount > 0;
+  const badgeCount = getBadgeCount(item.url, item, pendingOrders, pendingOffers);
+  const showBadge = badgeCount > 0;
 
   return (
     <SidebarMenuItem key={item.title}>
@@ -166,19 +185,26 @@ const NavItemCollapsed = ({
 export function NavMain({ items }: NavMainProps) {
   const path = usePathname();
   const { state, isMobile } = useSidebar();
-  const { data: pendingCount = 0, refetch } = usePendingOrdersCount();
-  const [count, setCount] = useState(0);
+  const { data: pendingOrders = 0, refetch: refetchOrders } = usePendingOrdersCount();
+  const { data: pendingOffers = 0, refetch: refetchOffers } = usePendingOffersCount();
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [offersCount, setOffersCount] = useState(0);
 
   useEffect(() => {
-    setCount(pendingCount);
-  }, [pendingCount]);
+    setOrdersCount(pendingOrders);
+  }, [pendingOrders]);
+
+  useEffect(() => {
+    setOffersCount(pendingOffers);
+  }, [pendingOffers]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      void refetch();
+      void refetchOrders();
+      void refetchOffers();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [refetch]);
+  }, [refetchOrders, refetchOffers]);
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
     if (subItems?.length) {
@@ -204,7 +230,8 @@ export function NavMain({ items }: NavMainProps) {
               {group.items.map((item) => {
                 if (state === "collapsed" && !isMobile) {
                   if (!item.subItems) {
-                    const showBadge = item.url === ORDERS_URL && item.badge && count > 0;
+                    const badgeCount = getBadgeCount(item.url, item, ordersCount, offersCount);
+                    const showBadge = badgeCount > 0;
                     return (
                       <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton
@@ -230,7 +257,8 @@ export function NavMain({ items }: NavMainProps) {
                       key={item.title}
                       item={item}
                       isActive={isItemActive}
-                      pendingCount={count}
+                      pendingOrders={ordersCount}
+                      pendingOffers={offersCount}
                     />
                   );
                 }
@@ -240,7 +268,8 @@ export function NavMain({ items }: NavMainProps) {
                     item={item}
                     isActive={isItemActive}
                     isSubmenuOpen={isSubmenuOpen}
-                    pendingCount={count}
+                    pendingOrders={ordersCount}
+                    pendingOffers={offersCount}
                   />
                 );
               })}

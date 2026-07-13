@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Link from 'next/link';
 import {
-  AlertTriangle,
   CreditCard,
   Eye,
   Package,
@@ -13,10 +12,10 @@ import {
 } from 'lucide-react';
 
 import RevenueChart from '@/components/charts/RevenueChart';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TablePaginationFooter } from '@/components/ui/table-pagination-footer';
 import {
   Table,
   TableBody,
@@ -27,8 +26,7 @@ import {
 } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/context/AuthContext';
-import { useLowStockProducts } from '@/hooks/useProducts';
-import { useRecentOrders } from '@/hooks/useRecentOrders';
+import { useOrders } from '@/hooks/useOrders';
 import { useVendorStats } from '@/hooks/useVendorStats';
 import { formatFcfa, formatOrderNumber } from '@/lib/format';
 import { getOrderStatusVariant, ORDER_STATUS_LABELS } from '@/lib/order-utils';
@@ -36,9 +34,17 @@ import { getOrderStatusVariant, ORDER_STATUS_LABELS } from '@/lib/order-utils';
 export default function Dashboard() {
   const { vendor } = useAuth();
   const [chartPeriod, setChartPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [ordersPage, setOrdersPage] = useState(1);
+  const ordersLimit = 10;
   const { data: stats, isLoading: statsLoading } = useVendorStats();
-  const { data: recentOrders = [], isLoading: ordersLoading } = useRecentOrders(5);
-  const { data: lowStockProducts = [] } = useLowStockProducts();
+  const { data: ordersData, isLoading: ordersLoading } = useOrders({
+    page: ordersPage,
+    limit: ordersLimit,
+  });
+
+  const recentOrders = ordersData?.data ?? [];
+  const ordersTotal = ordersData?.meta?.total ?? 0;
+  const ordersTotalPages = ordersData?.meta?.totalPages ?? 1;
 
   const currentDate = new Date();
 
@@ -96,13 +102,13 @@ export default function Dashboard() {
           <CardDescription>Les commandes les plus récentes de votre boutique.</CardDescription>
           <CardAction>
             <Badge variant="outline" className="font-medium tabular-nums">
-              {recentOrders.length} commande{recentOrders.length !== 1 ? 's' : ''}
+              {ordersTotal} commande{ordersTotal !== 1 ? 's' : ''}
             </Badge>
           </CardAction>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <div className="min-w-0 overflow-hidden rounded-lg border">
+        <CardContent className="flex min-w-0 flex-col gap-4 px-0">
+          <div className="min-w-0 overflow-hidden rounded-lg border mx-6">
             <Table>
               <TableHeader className="bg-muted/30">
                 <TableRow>
@@ -173,6 +179,15 @@ export default function Dashboard() {
               </TableBody>
             </Table>
           </div>
+
+          <TablePaginationFooter
+            visibleCount={recentOrders.length}
+            total={ordersTotal}
+            entityLabel="commandes"
+            pageIndex={ordersPage - 1}
+            pageCount={Math.max(ordersTotalPages, 1)}
+            onPageChange={(pageIndex) => setOrdersPage(pageIndex + 1)}
+          />
         </CardContent>
       </Card>
     </div>

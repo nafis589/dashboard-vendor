@@ -163,3 +163,27 @@ export interface PaginatedMeta {
   limit: number;
   totalPages: number;
 }
+
+export type OfferStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'COUNTER' | 'EXPIRED';
+
+export interface VendorOffer {
+  id: string;
+  product_id: string;
+  buyer_id: string;
+  vendor_id: string;
+  amount: number;
+  status: OfferStatus;
+  counter_amount: number | null;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+  product: {
+    title: string;
+    brand: string | null;
+    price: number;
+    image: string | null;
+  };
+  shop_name: string;
+  buyer_name: string;
+  final_amount: number | null;
+}

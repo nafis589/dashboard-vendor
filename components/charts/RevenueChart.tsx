@@ -64,7 +64,7 @@ export default function RevenueChart({ period, onPeriodChange }: RevenueChartPro
   const chartData = useMemo(() => {
     if (!data.length) return [];
 
-    return data.map((point, index) => {
+    const mapped = data.map((point, index) => {
       const date = point.date ?? buildFallbackDate(period, index, data.length);
       return {
         date,
@@ -72,6 +72,11 @@ export default function RevenueChart({ period, onPeriodChange }: RevenueChartPro
         revenue: Number(point.revenue) || 0,
       };
     });
+
+    const firstRevenueIndex = mapped.findIndex((point) => point.revenue > 0);
+    if (firstRevenueIndex === -1) return [];
+
+    return mapped.slice(firstRevenueIndex);
   }, [data, period]);
 
   const formatXTick = (value: string) => {

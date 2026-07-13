@@ -1,4 +1,5 @@
 import {
+  HandCoins,
   LayoutDashboard,
   Package,
   ShoppingBag,
@@ -31,6 +32,7 @@ export interface NavGroup {
 }
 
 export const ORDERS_URL = '/orders';
+export const OFFERS_URL = '/offers';
 
 export const sidebarItems: NavGroup[] = [
   {
@@ -57,6 +59,12 @@ export const sidebarItems: NavGroup[] = [
         title: 'Commandes',
         url: ORDERS_URL,
         icon: ShoppingBag,
+        badge: true,
+      },
+      {
+        title: 'Offres',
+        url: OFFERS_URL,
+        icon: HandCoins,
         badge: true,
       },
       {

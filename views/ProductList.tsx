@@ -34,15 +34,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -50,6 +41,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TablePaginationFooter } from '@/components/ui/table-pagination-footer';
 import {
   Table,
   TableBody,
@@ -70,10 +62,6 @@ import {
   type ProductStatus,
 } from '@/lib/product-schema';
 import type { VendorProduct } from '@/lib/types';
-
-function preventPaginationNavigation(event: React.MouseEvent<HTMLAnchorElement>) {
-  event.preventDefault();
-}
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'all', label: 'Tous les statuts' },
@@ -272,18 +260,6 @@ export default function ProductList() {
     pageCount: totalPages,
   });
 
-  const pageNumbers = useMemo(() => {
-    if (totalPages <= 3) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    if (page <= 2) return [1, 2, 3];
-    if (page >= totalPages - 1) return [totalPages - 2, totalPages - 1, totalPages];
-    return [page - 1, page, page + 1];
-  }, [page, totalPages]);
-
-  const startIndex = total === 0 ? 0 : (page - 1) * limit + 1;
-  const endIndex = Math.min(page * limit, total);
-
   return (
     <div className="min-w-0 space-y-4">
       <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -411,66 +387,14 @@ export default function ProductList() {
             </Table>
           </div>
 
-          <div className="flex flex-col items-center justify-between gap-4 px-6 pb-2 pt-2 sm:flex-row">
-            <p className="text-sm text-muted-foreground">
-              {total > 0 ? (
-                <>Affichage {startIndex}-{endIndex} sur {total} produits</>
-              ) : (
-                <>Aucun produit</>
-              )}
-            </p>
-
-            {totalPages > 1 && (
-              <Pagination className="mx-0 w-auto justify-end">
-                <PaginationContent className="gap-1.5">
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      className={page <= 1 ? 'pointer-events-none opacity-50' : undefined}
-                      onClick={(e) => {
-                        preventPaginationNavigation(e);
-                        setPage((p) => Math.max(1, p - 1));
-                      }}
-                    />
-                  </PaginationItem>
-                  {pageNumbers[0] > 1 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                  {pageNumbers.map((n) => (
-                    <PaginationItem key={n}>
-                      <PaginationLink
-                        href="#"
-                        isActive={page === n}
-                        onClick={(e) => {
-                          preventPaginationNavigation(e);
-                          setPage(n);
-                        }}
-                      >
-                        {n}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  {pageNumbers[pageNumbers.length - 1] < totalPages && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      className={page >= totalPages ? 'pointer-events-none opacity-50' : undefined}
-                      onClick={(e) => {
-                        preventPaginationNavigation(e);
-                        setPage((p) => Math.min(totalPages, p + 1));
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
-          </div>
+          <TablePaginationFooter
+            visibleCount={products.length}
+            total={total}
+            entityLabel="produits"
+            pageIndex={page - 1}
+            pageCount={Math.max(totalPages, 1)}
+            onPageChange={(pageIndex) => setPage(pageIndex + 1)}
+          />
         </CardContent>
       </Card>
 
