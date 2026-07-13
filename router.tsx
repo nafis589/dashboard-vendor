@@ -7,6 +7,7 @@ import Dashboard from '@/views/Dashboard';
 import ProductList from '@/views/ProductList';
 import ProductNew from '@/views/ProductNew';
 import OrderList from '@/views/OrderList';
+import MessageList from '@/views/MessageList';
 import Shipping from '@/views/Shipping';
 import Profile from '@/views/Profile';
 
@@ -31,6 +32,7 @@ export const protectedRoutes: AppRoute[] = [
   { path: '/products/:id/edit', protected: true },
   { path: '/orders', Component: OrderList, protected: true },
   { path: '/orders/:id', protected: true },
+  { path: '/messages', Component: MessageList, protected: true },
   { path: '/shipping', Component: Shipping, protected: true },
   { path: '/profile', Component: Profile, protected: true },
 ];

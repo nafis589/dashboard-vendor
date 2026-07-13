@@ -1,6 +1,7 @@
 import {
   HandCoins,
   LayoutDashboard,
+  MessageSquare,
   Package,
   ShoppingBag,
   Star,
@@ -33,6 +34,7 @@ export interface NavGroup {
 
 export const ORDERS_URL = '/orders';
 export const OFFERS_URL = '/offers';
+export const MESSAGES_URL = '/messages';
 
 export const sidebarItems: NavGroup[] = [
   {
@@ -65,6 +67,12 @@ export const sidebarItems: NavGroup[] = [
         title: 'Offres',
         url: OFFERS_URL,
         icon: HandCoins,
+        badge: true,
+      },
+      {
+        title: 'Messages',
+        url: MESSAGES_URL,
+        icon: MessageSquare,
         badge: true,
       },
       {

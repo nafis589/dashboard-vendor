@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +54,54 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
 
   const order = data?.data;
   const nextAction = order ? NEXT_TRANSITION[order.status] : null;
+
+  const latitude = order?.shipping_address.latitude;
+  const longitude = order?.shipping_address.longitude;
+  const [addressLabel, setAddressLabel] = useState('');
+
+  useEffect(() => {
+    if (!order) return;
+    const stored = order.shipping_address.address_label;
+    if (stored) {
+      setAddressLabel(stored);
+      return;
+    }
+    if (latitude == null || longitude == null) return;
+
+    let cancelled = false;
+    fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=fr`,
+      { headers: { Accept: 'application/json' } },
+    )
+      .then((r) => r.json())
+      .then((resdata: { address?: Record<string, string>; display_name?: string }) => {
+        if (cancelled) return;
+        const a = resdata.address ?? {};
+        const label =
+          a.neighbourhood ||
+          a.suburb ||
+          a.village ||
+          a.town ||
+          a.city ||
+          resdata.display_name?.split(',')[0] ||
+          `${latitude}, ${longitude}`;
+        const city = a.city || a.town || '';
+        setAddressLabel(city && label !== city ? `${label}, ${city}` : label);
+      })
+      .catch(() => {
+        if (!cancelled) setAddressLabel(`${latitude}, ${longitude}`);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order?.id, latitude, longitude]);
+
+  const googleMapsUrl =
+    latitude != null && longitude != null
+      ? `https://www.google.com/maps?q=${latitude},${longitude}`
+      : null;
 
   const itemsTotal = useMemo(() => {
     if (!order) return 0;
@@ -145,10 +193,22 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
                   <p className="text-xs text-muted-foreground">
                     Quantite: {item.quantity} · Prix unitaire: {item.unit_price.toLocaleString('fr-FR')} FCFA
                   </p>
+                  {item.offer_id && item.original_price != null && (
+                    <span className="mt-1 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
+                      Offre acceptée · prix initial {item.original_price.toLocaleString('fr-FR')} FCFA
+                    </span>
+                  )}
                 </div>
-                <p className="shrink-0 text-sm font-medium sm:text-base">
-                  {(item.unit_price * item.quantity).toLocaleString('fr-FR')} FCFA
-                </p>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-medium sm:text-base">
+                    {(item.unit_price * item.quantity).toLocaleString('fr-FR')} FCFA
+                  </p>
+                  {item.offer_id && item.original_price != null && (
+                    <p className="text-xs text-muted-foreground line-through">
+                      {(item.original_price * item.quantity).toLocaleString('fr-FR')} FCFA
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -170,9 +230,29 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
             <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">Adresse</span>
               <span className="max-w-[220px] text-right font-medium">
-                {order.shipping_address.notes || 'Non precisee'}
+                {googleMapsUrl ? (
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                  >
+                    {addressLabel || 'Localisation…'}
+                    <ExternalLink className="size-3.5 shrink-0" />
+                  </a>
+                ) : (
+                  addressLabel || 'Non precisee'
+                )}
               </span>
             </div>
+            {order.shipping_address.notes && (
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Note</span>
+                <span className="max-w-[220px] text-right font-medium">
+                  {order.shipping_address.notes}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between gap-3">
               <span className="text-muted-foreground">Region</span>
               <span className="font-medium text-right">{order.shipping_region_id}</span>

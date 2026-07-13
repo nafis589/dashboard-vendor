@@ -25,7 +25,8 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { OFFERS_URL, ORDERS_URL, type NavGroup, type NavMainItem } from "@/config/vendor-navigation";
+import { MESSAGES_URL, OFFERS_URL, ORDERS_URL, type NavGroup, type NavMainItem } from "@/config/vendor-navigation";
+import { useUnreadMessagesCount } from "@/hooks/useConversations";
 import { usePendingOffersCount } from "@/hooks/useOffers";
 import { usePendingOrdersCount } from "@/hooks/useOrders";
 
@@ -50,10 +51,12 @@ function getBadgeCount(
   item: NavMainItem,
   pendingOrders: number,
   pendingOffers: number,
+  pendingMessages: number,
 ): number {
   if (!item.badge) return 0;
   if (url === ORDERS_URL) return pendingOrders;
   if (url === OFFERS_URL) return pendingOffers;
+  if (url === MESSAGES_URL) return pendingMessages;
   return 0;
 }
 
@@ -63,14 +66,16 @@ const NavItemExpanded = ({
   isSubmenuOpen,
   pendingOrders,
   pendingOffers,
+  pendingMessages,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   isSubmenuOpen: (subItems?: NavMainItem["subItems"]) => boolean;
   pendingOrders: number;
   pendingOffers: number;
+  pendingMessages: number;
 }) => {
-  const badgeCount = getBadgeCount(item.url, item, pendingOrders, pendingOffers);
+  const badgeCount = getBadgeCount(item.url, item, pendingOrders, pendingOffers, pendingMessages);
   const showBadge = badgeCount > 0;
 
   return (
@@ -131,13 +136,15 @@ const NavItemCollapsed = ({
   isActive,
   pendingOrders,
   pendingOffers,
+  pendingMessages,
 }: {
   item: NavMainItem;
   isActive: (url: string, subItems?: NavMainItem["subItems"]) => boolean;
   pendingOrders: number;
   pendingOffers: number;
+  pendingMessages: number;
 }) => {
-  const badgeCount = getBadgeCount(item.url, item, pendingOrders, pendingOffers);
+  const badgeCount = getBadgeCount(item.url, item, pendingOrders, pendingOffers, pendingMessages);
   const showBadge = badgeCount > 0;
 
   return (
@@ -187,8 +194,10 @@ export function NavMain({ items }: NavMainProps) {
   const { state, isMobile } = useSidebar();
   const { data: pendingOrders = 0, refetch: refetchOrders } = usePendingOrdersCount();
   const { data: pendingOffers = 0, refetch: refetchOffers } = usePendingOffersCount();
+  const { data: unreadMessages = 0, refetch: refetchMessages } = useUnreadMessagesCount();
   const [ordersCount, setOrdersCount] = useState(0);
   const [offersCount, setOffersCount] = useState(0);
+  const [messagesCount, setMessagesCount] = useState(0);
 
   useEffect(() => {
     setOrdersCount(pendingOrders);
@@ -199,12 +208,17 @@ export function NavMain({ items }: NavMainProps) {
   }, [pendingOffers]);
 
   useEffect(() => {
+    setMessagesCount(unreadMessages);
+  }, [unreadMessages]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       void refetchOrders();
       void refetchOffers();
+      void refetchMessages();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [refetchOrders, refetchOffers]);
+  }, [refetchOrders, refetchOffers, refetchMessages]);
 
   const isItemActive = (url: string, subItems?: NavMainItem["subItems"]) => {
     if (subItems?.length) {
@@ -230,7 +244,7 @@ export function NavMain({ items }: NavMainProps) {
               {group.items.map((item) => {
                 if (state === "collapsed" && !isMobile) {
                   if (!item.subItems) {
-                    const badgeCount = getBadgeCount(item.url, item, ordersCount, offersCount);
+                    const badgeCount = getBadgeCount(item.url, item, ordersCount, offersCount, messagesCount);
                     const showBadge = badgeCount > 0;
                     return (
                       <SidebarMenuItem key={item.title}>
@@ -259,6 +273,7 @@ export function NavMain({ items }: NavMainProps) {
                       isActive={isItemActive}
                       pendingOrders={ordersCount}
                       pendingOffers={offersCount}
+                      pendingMessages={messagesCount}
                     />
                   );
                 }
@@ -270,6 +285,7 @@ export function NavMain({ items }: NavMainProps) {
                     isSubmenuOpen={isSubmenuOpen}
                     pendingOrders={ordersCount}
                     pendingOffers={offersCount}
+                    pendingMessages={messagesCount}
                   />
                 );
               })}

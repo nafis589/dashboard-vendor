@@ -90,6 +90,7 @@ export interface VendorOrder {
     latitude?: number;
     longitude?: number;
     region_id?: string;
+    address_label?: string | null;
   };
   created_at: string;
   updated_at: string;
@@ -101,6 +102,8 @@ export interface VendorOrderItem {
   product_id: string | null;
   quantity: number;
   unit_price: number;
+  offer_id: string | null;
+  original_price: number | null;
   product_snapshot: {
     title: string;
     image: string | null;

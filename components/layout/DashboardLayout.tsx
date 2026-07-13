@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 
 import { AppSidebar } from '@/components/admin/sidebar/app-sidebar';
-import { OfferSocketListener } from '@/components/offers/OfferSocketListener';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 export default function DashboardLayout({ children }: Readonly<{ children: ReactNode }>) {
@@ -14,7 +13,6 @@ export default function DashboardLayout({ children }: Readonly<{ children: React
         } as React.CSSProperties
       }
     >
-      <OfferSocketListener />
       <AppSidebar />
       <SidebarInset className="peer-data-[variant=inset]:border min-w-0">
         <header className="sticky top-0 z-50 flex h-12 shrink-0 items-center justify-between gap-2 border-b bg-background/50 backdrop-blur-md px-4 lg:px-6 overflow-hidden rounded-t-[inherit]">
