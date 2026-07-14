@@ -29,6 +29,7 @@ export const protectedRoutes: AppRoute[] = [
   { path: '/dashboard', Component: Dashboard, protected: true },
   { path: '/products', Component: ProductList, protected: true },
   { path: '/products/new', Component: ProductNew, protected: true },
+  { path: '/products/:id', protected: true },
   { path: '/products/:id/edit', protected: true },
   { path: '/orders', Component: OrderList, protected: true },
   { path: '/orders/:id', protected: true },

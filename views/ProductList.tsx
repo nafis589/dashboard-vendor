@@ -62,6 +62,7 @@ import {
   type ProductStatus,
 } from '@/lib/product-schema';
 import type { VendorProduct } from '@/lib/types';
+import { formatViews } from '@/lib/utils';
 
 const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'all', label: 'Tous les statuts' },
@@ -129,7 +130,12 @@ export default function ProductList() {
         accessorKey: 'title',
         header: 'Titre',
         cell: ({ row }) => (
-          <span className="font-medium line-clamp-2 max-w-[220px]">{row.original.title}</span>
+          <Link
+            href={`/products/${row.original.id}`}
+            className="font-medium line-clamp-2 max-w-[220px] hover:underline"
+          >
+            {row.original.title}
+          </Link>
         ),
       },
       {
@@ -181,11 +187,17 @@ export default function ProductList() {
       {
         accessorKey: 'views_count',
         header: 'Vues',
-        cell: ({ row }) => (
-          <span className="tabular-nums text-muted-foreground">
-            {row.original.views_count ?? 0}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const views = row.original.views_count ?? 0;
+          return (
+            <span
+              className="tabular-nums text-muted-foreground"
+              title={`${views.toLocaleString('fr-FR')} vues au total`}
+            >
+              {formatViews(views)}
+            </span>
+          );
+        },
       },
       {
         id: 'actions',

@@ -71,13 +71,7 @@ export default function Dashboard() {
             label="Commandes en attente"
             value={statsLoading ? null : String(stats?.pending_orders ?? 0)}
             hint="À traiter"
-            badge={
-              (stats?.pending_orders ?? 0) > 0 ? (
-                <Badge className="bg-orange-500 text-white hover:bg-orange-500">
-                  {stats?.pending_orders}
-                </Badge>
-              ) : undefined
-            }
+            
           />
           <KpiCard
             icon={Package}

@@ -158,6 +158,9 @@ export interface VendorProductImage {
 
 export interface VendorProductDetail extends VendorProduct {
   images: VendorProductImage[];
+  category_name?: string | null;
+  orders_count?: number;
+  created_at?: string;
 }
 
 export interface PaginatedMeta {

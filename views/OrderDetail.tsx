@@ -195,7 +195,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
                   </p>
                   {item.offer_id && item.original_price != null && (
                     <span className="mt-1 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-semibold text-green-700">
-                      Offre acceptée · prix initial {item.original_price.toLocaleString('fr-FR')} FCFA
+                      Offre acceptée
                     </span>
                   )}
                 </div>
