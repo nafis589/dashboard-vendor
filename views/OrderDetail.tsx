@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useOrderDetail, useUpdateOrderStatus } from '@/hooks/useOrders';
-import { ORDER_STATUS_LABELS } from '@/lib/order-utils';
+import { ORDER_STATUS_LABELS, formatShippingMethodLabel } from '@/lib/order-utils';
 import type { OrderStatus } from '@/lib/types';
 
 interface OrderDetailProps {
@@ -253,21 +253,35 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
                 </span>
               </div>
             )}
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Region</span>
-              <span className="font-medium text-right">{order.shipping_region_id}</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Methode</span>
-              <span className="font-medium text-right">
-                {order.shipping_method === 'PER_KM' ? 'Par km' : 'Fixe'}
-              </span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Frais livraison</span>
+            <div className="flex justify-between gap-3 border-t border-gray-200 pt-2">
+              <span className="text-muted-foreground">Frais de livraison</span>
               <span className="font-medium text-right">
                 {order.shipping_fee.toLocaleString('fr-FR')} FCFA
               </span>
+            </div>
+            {order.shipping_detail && (
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Détail</span>
+                <span className="max-w-[220px] text-right font-medium">{order.shipping_detail}</span>
+              </div>
+            )}
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Méthode</span>
+              <span className="font-medium text-right">
+                {formatShippingMethodLabel(order.shipping_method)}
+              </span>
+            </div>
+            {order.shipping_method === 'PER_KM' && order.shipping_distance_km != null && (
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Distance</span>
+                <span className="font-medium text-right">
+                  {order.shipping_distance_km.toLocaleString('fr-FR')} km
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Région</span>
+              <span className="font-medium text-right">{order.shipping_region_id}</span>
             </div>
             <div className="flex justify-between gap-3 border-t border-gray-200 pt-2">
               <span className="text-muted-foreground">Total</span>

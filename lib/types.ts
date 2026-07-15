@@ -125,6 +125,7 @@ export interface VendorOrderDetail extends VendorOrder {
   shipping_region_id: string;
   shipping_method: 'PER_KM' | 'FIXED';
   shipping_distance_km: number | null;
+  shipping_detail: string | null;
   tracking_number: string | null;
   items: VendorOrderItem[];
   status_history: VendorOrderStatusHistoryEntry[];

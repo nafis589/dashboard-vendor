@@ -40,8 +40,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useOrderDetail, useOrders } from '@/hooks/useOrders';
-import { ORDER_STATUS_LABELS } from '@/lib/order-utils';
+import { formatFcfa } from '@/lib/format';
+import {
+  ORDER_STATUS_LABELS,
+  formatOrderAmountTooltip,
+  getOrderItemsTotal,
+} from '@/lib/order-utils';
 import type { OrderStatus, VendorOrder } from '@/lib/types';
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
@@ -175,11 +181,23 @@ export default function OrderList() {
         ),
       },
       {
-        accessorKey: 'total_amount',
-        header: 'Total',
-        cell: ({ row }) => (
-          <span className="font-medium">{Number(row.original.total_amount).toLocaleString('fr-FR')} FCFA</span>
-        ),
+        id: 'amount',
+        header: 'Montant',
+        cell: ({ row }) => {
+          const itemsTotal = getOrderItemsTotal(row.original.total_amount, row.original.shipping_fee);
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="cursor-default font-medium tabular-nums">
+                  {formatFcfa(row.original.total_amount)}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                {formatOrderAmountTooltip(itemsTotal, row.original.shipping_fee)}
+              </TooltipContent>
+            </Tooltip>
+          );
+        },
       },
       {
         accessorKey: 'status',

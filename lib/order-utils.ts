@@ -1,4 +1,5 @@
 import type { OrderStatus } from '@/lib/types';
+import { formatFcfa } from '@/lib/format';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: 'En attente',
@@ -9,6 +10,18 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   CANCELLED: 'Annulée',
   RETURNED: 'Retournée',
 };
+
+export function getOrderItemsTotal(totalAmount: number, shippingFee: number): number {
+  return totalAmount - shippingFee;
+}
+
+export function formatOrderAmountTooltip(itemsTotal: number, shippingFee: number): string {
+  return `Articles : ${formatFcfa(itemsTotal)} · Livraison : ${formatFcfa(shippingFee)}`;
+}
+
+export function formatShippingMethodLabel(method: 'PER_KM' | 'FIXED'): string {
+  return method === 'PER_KM' ? 'Par kilomètre' : 'Prix fixe inter-région';
+}
 
 export function getOrderStatusVariant(
   status: OrderStatus,
