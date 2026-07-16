@@ -9,6 +9,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   DELIVERED: 'Livrée',
   CANCELLED: 'Annulée',
   RETURNED: 'Retournée',
+  REFUSED: 'Refusée',
 };
 
 export function getOrderItemsTotal(totalAmount: number, shippingFee: number): number {
@@ -36,6 +37,7 @@ export function getOrderStatusVariant(
       return 'default';
     case 'CANCELLED':
     case 'RETURNED':
+    case 'REFUSED':
       return 'destructive';
     default:
       return 'outline';

@@ -35,6 +35,34 @@ export interface VendorProfileResponse {
   data: VendorUser;
 }
 
+export interface VendorProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string | null;
+  avatar_url: string | null;
+  shop_name: string;
+  shop_description: string | null;
+  followers_count: number;
+  following_count: number;
+  role: 'VENDOR';
+  status: VendorStatus;
+}
+
+export interface VendorProfileDetailResponse {
+  data: VendorProfile;
+}
+
+export interface UpdateVendorProfilePayload {
+  first_name?: string;
+  last_name?: string;
+  phone?: string | null;
+  avatar_url?: string;
+  shop_name?: string;
+  shop_description?: string | null;
+}
+
 export interface ValidateLocationResponse {
   data: {
     isInTogo: boolean;
@@ -71,7 +99,8 @@ export type OrderStatus =
   | 'SHIPPED'
   | 'DELIVERED'
   | 'CANCELLED'
-  | 'RETURNED';
+  | 'RETURNED'
+  | 'REFUSED';
 
 export interface VendorOrder {
   id: string;

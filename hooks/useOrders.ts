@@ -62,3 +62,18 @@ export function useUpdateOrderStatus(orderId: string) {
     },
   });
 }
+
+export function useRefuseOrder(orderId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: { reason?: string }) =>
+      api.patch<OrderResponse>(`/api/vendor/orders/${orderId}/refuse`, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['vendor', 'orders'] });
+      queryClient.invalidateQueries({ queryKey: ['vendor', 'orders', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['vendor', 'orders', 'recent'] });
+      queryClient.invalidateQueries({ queryKey: ['vendor', 'orders', 'pending-count'] });
+    },
+  });
+}

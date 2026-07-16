@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+import RefuseOrderModal from '@/components/orders/RefuseOrderModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -26,7 +27,28 @@ const NEXT_TRANSITION: Record<OrderStatus, { next: OrderStatus; cta: string } | 
   DELIVERED: null,
   CANCELLED: null,
   RETURNED: null,
+  REFUSED: null,
 };
+
+function timelineDotClass(status: OrderStatus): string {
+  if (status === 'REFUSED') return 'bg-[#7F1D1D] ring-[#7F1D1D]/20';
+  switch (status) {
+    case 'PENDING':
+      return 'bg-orange-500 ring-orange-500/20';
+    case 'CONFIRMED':
+    case 'PREPARING':
+      return 'bg-blue-500 ring-blue-500/20';
+    case 'SHIPPED':
+      return 'bg-violet-500 ring-violet-500/20';
+    case 'DELIVERED':
+      return 'bg-emerald-500 ring-emerald-500/20';
+    case 'CANCELLED':
+    case 'RETURNED':
+      return 'bg-red-500 ring-red-500/20';
+    default:
+      return 'bg-muted ring-muted/20';
+  }
+}
 
 function statusBadgeClass(status: OrderStatus): string {
   switch (status) {
@@ -42,6 +64,8 @@ function statusBadgeClass(status: OrderStatus): string {
     case 'CANCELLED':
     case 'RETURNED':
       return 'border-transparent bg-red-500/15 text-red-700 dark:text-red-300';
+    case 'REFUSED':
+      return 'border-transparent bg-[#7F1D1D] text-white';
     default:
       return 'border-transparent';
   }
@@ -49,7 +73,8 @@ function statusBadgeClass(status: OrderStatus): string {
 
 export default function OrderDetail({ orderId }: OrderDetailProps) {
   const [note, setNote] = useState('');
-  const { data, isLoading, isError } = useOrderDetail(orderId);
+  const [refuseOpen, setRefuseOpen] = useState(false);
+  const { data, isLoading, isError, refetch } = useOrderDetail(orderId);
   const mutation = useUpdateOrderStatus(orderId);
 
   const order = data?.data;
@@ -253,7 +278,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
                 </span>
               </div>
             )}
-            <div className="flex justify-between gap-3 border-t border-gray-200 pt-2">
+            <div className="flex justify-between gap-3 border-gray-200 pt-2">
               <span className="text-muted-foreground">Frais de livraison</span>
               <span className="font-medium text-right">
                 {order.shipping_fee.toLocaleString('fr-FR')} FCFA
@@ -283,7 +308,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
               <span className="text-muted-foreground">Région</span>
               <span className="font-medium text-right">{order.shipping_region_id}</span>
             </div>
-            <div className="flex justify-between gap-3 border-t border-gray-200 pt-2">
+            <div className="flex justify-between gap-3 border-gray-200 pt-2">
               <span className="text-muted-foreground">Total</span>
               <span className="font-semibold text-right">
                 {(itemsTotal + order.shipping_fee).toLocaleString('fr-FR')} FCFA
@@ -293,6 +318,30 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
 
           <div className="space-y-3 border-t border-gray-200 pt-4">
             <h2 className="text-base font-semibold text-foreground">Changement de statut</h2>
+            {order.status_history.length > 0 && (
+              <div className="space-y-0 rounded-lg border p-4">
+                <h3 className="mb-3 text-sm font-medium text-muted-foreground">Historique</h3>
+                {order.status_history.map((entry, index) => (
+                  <div key={entry.id} className="relative flex gap-3 pb-5 last:pb-0">
+                    {index < order.status_history.length - 1 && (
+                      <div className="absolute left-[9px] top-5 h-[calc(100%-12px)] w-0.5 bg-border" />
+                    )}
+                    <div
+                      className={`relative z-10 mt-0.5 size-[18px] shrink-0 rounded-full ring-4 ${timelineDotClass(entry.status)}`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">{ORDER_STATUS_LABELS[entry.status]}</p>
+                      {entry.note && (
+                        <p className="mt-0.5 text-sm text-muted-foreground">{entry.note}</p>
+                      )}
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {new Date(entry.created_at).toLocaleString('fr-FR')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             {nextAction ? (
               <>
                 <div className="space-y-2">
@@ -304,9 +353,22 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
                     onChange={(e) => setNote(e.target.value)}
                   />
                 </div>
-                <Button onClick={handleStatusUpdate} disabled={mutation.isPending} className="w-full">
-                  {mutation.isPending ? 'Mise a jour...' : nextAction.cta}
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button onClick={handleStatusUpdate} disabled={mutation.isPending} className="w-full">
+                    {mutation.isPending ? 'Mise a jour...' : nextAction.cta}
+                  </Button>
+                  {order.status === 'PENDING' && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      onClick={() => setRefuseOpen(true)}
+                    >
+                      <XCircle className="mr-2 size-4" />
+                      Refuser la commande
+                    </Button>
+                  )}
+                </div>
               </>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -316,6 +378,17 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
           </div>
         </div>
       </div>
+
+      <RefuseOrderModal
+        open={refuseOpen}
+        onOpenChange={setRefuseOpen}
+        orderId={order.id}
+        orderNumber={`#${order.id.slice(0, 8).toUpperCase()}`}
+        onSuccess={() => {
+          toast.success('Commande refusée — le stock a été restauré');
+          void refetch();
+        }}
+      />
     </div>
   );
 }

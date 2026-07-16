@@ -11,7 +11,9 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
+import { toast } from 'sonner';
 
+import RefuseOrderModal from '@/components/orders/RefuseOrderModal';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -57,6 +59,7 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: 'PREPARING', label: 'En préparation' },
   { value: 'SHIPPED', label: 'Expédiées' },
   { value: 'DELIVERED', label: 'Livrées' },
+  { value: 'REFUSED', label: 'Refusées' },
 ];
 
 function isPendingOver24h(order: VendorOrder): boolean {
@@ -88,6 +91,8 @@ function statusBadgeClass(status: OrderStatus): string {
     case 'CANCELLED':
     case 'RETURNED':
       return 'border-transparent bg-red-500/15 text-red-700 dark:text-red-300';
+    case 'REFUSED':
+      return 'border-transparent bg-[#7F1D1D] text-white';
     default:
       return 'border-transparent';
   }
@@ -125,9 +130,10 @@ function OrderItemsPreview({ orderId, itemsCount }: { orderId: string; itemsCoun
 export default function OrderList() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(1);
+  const [refuseTarget, setRefuseTarget] = useState<VendorOrder | null>(null);
   const limit = 10;
 
-  const { data, isLoading, isError } = useOrders({
+  const { data, isLoading, isError, refetch } = useOrders({
     status: statusFilter === 'ALL' ? undefined : statusFilter,
     page,
     limit,
@@ -225,6 +231,14 @@ export default function OrderList() {
                 <DropdownMenuItem asChild>
                   <Link href={`/orders/${row.original.id}`}>Voir détails</Link>
                 </DropdownMenuItem>
+                {row.original.status === 'PENDING' && (
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600"
+                    onClick={() => setRefuseTarget(row.original)}
+                  >
+                    Refuser
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -340,6 +354,22 @@ export default function OrderList() {
           />
         </CardContent>
       </Card>
+
+      {refuseTarget && (
+        <RefuseOrderModal
+          open={Boolean(refuseTarget)}
+          onOpenChange={(open) => {
+            if (!open) setRefuseTarget(null);
+          }}
+          orderId={refuseTarget.id}
+          orderNumber={`#${refuseTarget.id.slice(0, 8).toUpperCase()}`}
+          onSuccess={() => {
+            toast.success('Commande refusée — le stock a été restauré');
+            void refetch();
+            setRefuseTarget(null);
+          }}
+        />
+      )}
     </div>
   );
 }
