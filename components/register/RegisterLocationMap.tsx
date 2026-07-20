@@ -11,6 +11,22 @@ import MapSearchBar from './MapSearchBar';
 const TOGO_CENTER: [number, number] = [6.1375, 1.2123];
 const MAP_ZOOM = 7;
 
+type MapPosition = { lat: number; lng: number };
+
+function isValidMapPosition(
+  position?: Partial<MapPosition> | null,
+): position is MapPosition {
+  return (
+    position != null &&
+    Number.isFinite(position.lat) &&
+    Number.isFinite(position.lng)
+  );
+}
+
+function toLatLngTuple(position: MapPosition): [number, number] {
+  return [position.lat, position.lng];
+}
+
 export interface LocationValidationResult {
   lat: number;
   lng: number;
@@ -25,6 +41,14 @@ interface RegisterLocationMapProps {
   onValidatingChange?: (isValidating: boolean) => void;
   onGeolocatingChange?: (isGeolocating: boolean) => void;
   geolocateSignal?: number;
+  initialPosition?: Partial<MapPosition> | null;
+  interactive?: boolean;
+  searchBarExtra?: React.ReactNode;
+  className?: string;
+  disableDefaultZoom?: boolean;
+  onMapReady?: (map: L.Map) => void;
+  /** Classes d'inset horizontal pour la barre de recherche (défaut: espace pour zoom Leaflet à gauche) */
+  searchBarInsetClassName?: string;
 }
 
 function MapClickHandler({ onSelect }: { onSelect: (lat: number, lng: number) => void }) {
@@ -45,13 +69,31 @@ function MapRefBinder({ mapRef }: { mapRef: React.MutableRefObject<L.Map | null>
   return null;
 }
 
+function MapReadyNotifier({ onMapReady }: { onMapReady?: (map: L.Map) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    onMapReady?.(map);
+  }, [map, onMapReady]);
+  return null;
+}
+
 export default function RegisterLocationMap({
   onLocationValidated,
   onValidatingChange,
   onGeolocatingChange,
   geolocateSignal,
+  initialPosition,
+  interactive = true,
+  searchBarExtra,
+  className,
+  disableDefaultZoom = false,
+  onMapReady,
+  searchBarInsetClassName = 'left-[3.25rem] right-3',
 }: RegisterLocationMapProps) {
-  const [position, setPosition] = useState<[number, number] | null>(null);
+  const validInitial = isValidMapPosition(initialPosition) ? initialPosition : null;
+  const [position, setPosition] = useState<[number, number] | null>(
+    validInitial ? toLatLngTuple(validInitial) : null,
+  );
   const mapRef = useRef<L.Map | null>(null);
 
   useEffect(() => {
@@ -84,14 +126,26 @@ export default function RegisterLocationMap({
 
   const selectPosition = useCallback(
     (lat: number, lng: number, flyToZoom?: number) => {
+      if (!interactive) return;
       setPosition([lat, lng]);
       if (flyToZoom != null) {
         mapRef.current?.flyTo([lat, lng], flyToZoom);
       }
       void validatePosition(lat, lng);
     },
-    [validatePosition],
+    [validatePosition, interactive],
   );
+
+  useEffect(() => {
+    if (validInitial) {
+      setPosition(toLatLngTuple(validInitial));
+      mapRef.current?.flyTo(toLatLngTuple(validInitial), 14);
+      return;
+    }
+    if (initialPosition == null) {
+      setPosition(null);
+    }
+  }, [validInitial?.lat, validInitial?.lng, initialPosition]);
 
   const handleSearchSelect = useCallback(
     (lat: number, lon: number) => {
@@ -133,15 +187,22 @@ export default function RegisterLocationMap({
   };
 
   return (
-    <div className="relative h-full w-full">
-      {/* Barre de recherche — décalée après les contrôles zoom Leaflet */}
-      <div className="absolute top-3 left-[3.25rem] right-3 z-[1000] max-w-md pointer-events-auto">
-        <MapSearchBar onSelect={handleSearchSelect} />
+    <div className={`relative h-full w-full ${className ?? ''}`}>
+      <div
+        className={`absolute top-3 z-[1000] flex items-center gap-2 pointer-events-none ${searchBarInsetClassName}`}
+      >
+        <div className="pointer-events-auto min-w-0 flex-1 max-w-md">
+          <MapSearchBar onSelect={handleSearchSelect} />
+        </div>
+        {searchBarExtra ? (
+          <div className="pointer-events-auto shrink-0">{searchBarExtra}</div>
+        ) : null}
       </div>
 
       <MapContainer
         center={TOGO_CENTER}
         zoom={MAP_ZOOM}
+        zoomControl={!disableDefaultZoom}
         style={{ height: '100%', width: '100%' }}
         className="z-0 h-full w-full"
       >
@@ -150,9 +211,18 @@ export default function RegisterLocationMap({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MapRefBinder mapRef={mapRef} />
-        <MapClickHandler onSelect={(lat, lng) => selectPosition(lat, lng)} />
-        {position && (
-          <Marker position={position} draggable eventHandlers={markerEventHandlers} />
+        <MapReadyNotifier onMapReady={onMapReady} />
+        <MapClickHandler
+          onSelect={(lat, lng) => {
+            if (interactive) selectPosition(lat, lng);
+          }}
+        />
+        {position && Number.isFinite(position[0]) && Number.isFinite(position[1]) && (
+          <Marker
+            position={position}
+            draggable={interactive}
+            eventHandlers={interactive ? markerEventHandlers : undefined}
+          />
         )}
       </MapContainer>
     </div>

@@ -58,7 +58,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:shadow-xs sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs sm:grid-cols-2 xl:grid-cols-4 dark:*:data-[slot=card]:bg-card">
         <TooltipProvider>
           <KpiCard
             icon={CreditCard}
@@ -71,7 +71,6 @@ export default function Dashboard() {
             label="Commandes en attente"
             value={statsLoading ? null : String(stats?.pending_orders ?? 0)}
             hint="À traiter"
-            
           />
           <KpiCard
             icon={Package}
@@ -202,33 +201,29 @@ function KpiCard({
   badge?: React.ReactNode;
 }) {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-            <Icon className="size-4" />
-          </div>
-          {badge}
+    <div data-slot="card" className="bg-card rounded-xl border py-6 shadow-sm px-6">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex size-7 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+          <Icon className="size-4" />
         </div>
-        <CardDescription>{label}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1">
-        {value === null ? (
-          <Skeleton className="h-9 w-32" />
-        ) : (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="font-medium text-3xl tabular-nums leading-none tracking-tight truncate max-w-full">
-                {value}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{value}</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-        <p className="text-muted-foreground text-sm truncate">{hint}</p>
-      </CardContent>
-    </Card>
+        {badge}
+      </div>
+      <div className="mt-4 text-sm text-muted-foreground">{label}</div>
+      {value === null ? (
+        <Skeleton className="mt-1 h-9 w-32" />
+      ) : (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="mt-1 max-w-full truncate font-medium text-3xl tabular-nums leading-none">
+              {value}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{value}</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
+      <div className="mt-1 truncate text-xs text-muted-foreground">{hint}</div>
+    </div>
   );
 }

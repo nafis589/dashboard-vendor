@@ -92,6 +92,30 @@ export interface VendorShippingRegionInput {
   fixed_price?: number | null;
 }
 
+export interface VendorShippingLocation {
+  lat: number;
+  lng: number;
+  region_id: string;
+  address_label: string | null;
+}
+
+export interface VendorShippingRegionConfig {
+  region_id: string;
+  is_home_region: boolean;
+  price_per_km: number | null;
+  min_fee: number;
+  fixed_price: number | null;
+}
+
+export interface VendorShippingConfig {
+  location: VendorShippingLocation | null;
+  regions: VendorShippingRegionConfig[];
+}
+
+export interface VendorShippingConfigResponse {
+  data: VendorShippingConfig;
+}
+
 export type OrderStatus =
   | 'PENDING'
   | 'CONFIRMED'

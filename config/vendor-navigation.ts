@@ -1,11 +1,11 @@
 import {
   HandCoins,
   LayoutDashboard,
+  MapPin,
   MessageSquare,
   Package,
   ShoppingBag,
   Star,
-  Truck,
   User,
   type LucideIcon,
 } from 'lucide-react';
@@ -76,9 +76,9 @@ export const sidebarItems: NavGroup[] = [
         badge: true,
       },
       {
-        title: 'Livraison',
+        title: 'Adresse & Livraison',
         url: '/shipping',
-        icon: Truck,
+        icon: MapPin,
       },
       {
         title: 'Mon profil',
