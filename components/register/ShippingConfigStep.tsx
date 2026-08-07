@@ -133,7 +133,7 @@ export default function ShippingConfigStep({
       <div className="space-y-4 rounded-lg border border-[#EBEBEB] p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-[#1A1A1A]">
-            ✓ {homeRegion.name} — {homeRegion.capital}
+            ✓ {homeRegion.name}, {homeRegion.capital}
           </span>
           <span className="rounded-full bg-black px-2.5 py-0.5 text-xs font-medium text-white">
             Votre région
@@ -194,7 +194,7 @@ export default function ShippingConfigStep({
                   className="size-4 accent-black"
                 />
                 <span className="text-sm text-[#1A1A1A]">
-                  {region.name} — {region.capital}
+                  {region.name}, {region.capital}
                 </span>
               </label>
 

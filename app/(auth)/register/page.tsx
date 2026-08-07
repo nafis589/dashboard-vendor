@@ -213,15 +213,15 @@ export default function RegisterPage() {
   return (
     <main className="h-dvh bg-white">
       <div className="grid h-full p-2 lg:grid-cols-2">
-        {/* ════════ COLONNE GAUCHE — Branding (identique au login) ════════ */}
+        {/* ════════ COLONNE GAUCHE, Branding (identique au login) ════════ */}
         <AuthBrandingPanel
           tagline={REGISTER_STEP_TAGLINES[step as 1 | 2 | 3]}
           className="relative order-1 hidden min-h-0 lg:flex lg:w-full"
         />
 
-        {/* ════════ COLONNE DROITE — Formulaire / carte ════════ */}
+        {/* ════════ COLONNE DROITE, Formulaire / carte ════════ */}
         <div className="order-2 flex h-full min-h-0 flex-col">
-          {/* ÉTAPE 2 — Carte plein écran */}
+          {/* ÉTAPE 2, Carte plein écran */}
           {step === 2 ? (
             <div className="relative min-h-0 flex-1 overflow-hidden rounded-3xl">
               <RegisterLocationMap
@@ -231,7 +231,7 @@ export default function RegisterPage() {
                 geolocateSignal={geolocateSignal}
               />
 
-              {/* Modal flottant bas — statut + actions, posé sur la carte */}
+              {/* Modal flottant bas, statut + actions, posé sur la carte */}
               <div className="pointer-events-none absolute inset-x-3 bottom-3 z-[1000]">
                 <div className="pointer-events-auto space-y-4 rounded-2xl bg-white p-4 shadow-[0_4px_24px_rgba(0,0,0,0.12)]">
                   {/* Statut de validation */}
@@ -302,7 +302,7 @@ export default function RegisterPage() {
               </div>
             </div>
           ) : (
-            /* ÉTAPES 1 & 3 — Formulaire (scroll masqué) */
+            /* ÉTAPES 1 & 3, Formulaire (scroll masqué) */
             <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto">
               <div className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center px-6 py-10">
                 <div className="mb-8 space-y-2">
@@ -316,7 +316,7 @@ export default function RegisterPage() {
                   </p>
                 </div>
 
-                {/* ÉTAPE 1 — Compte */}
+                {/* ÉTAPE 1, Compte */}
                 {step === 1 && (
                   <form onSubmit={handleSubmit(onStep1Submit)} className="space-y-5">
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -466,13 +466,13 @@ export default function RegisterPage() {
                   </form>
                 )}
 
-                {/* ÉTAPE 3 — Livraison */}
+                {/* ÉTAPE 3, Livraison */}
                 {step === 3 && homeRegion && (
                   <div className="space-y-5">
                     <div className="space-y-4 rounded-lg border border-[#EBEBEB] p-4">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-semibold text-[#1A1A1A]">
-                          ✓ {homeRegion.name} — {homeRegion.capital}
+                          ✓ {homeRegion.name}, {homeRegion.capital}
                         </span>
                         <span className="rounded-full bg-black px-2.5 py-0.5 text-xs font-medium text-white">
                           Votre région
@@ -543,7 +543,7 @@ export default function RegisterPage() {
                                 className="size-4 accent-black"
                               />
                               <span className="text-sm text-[#1A1A1A]">
-                                {region.name} — {region.capital}
+                                {region.name}, {region.capital}
                               </span>
                             </label>
 
