@@ -129,8 +129,9 @@ export default function ShippingConfigStep({
   }
 
   return (
-    <div className="scrollbar-hide max-h-full space-y-4 overflow-y-auto">
-      <div className="space-y-4 rounded-lg border border-[#EBEBEB] p-4">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="scrollbar-hide flex-1 space-y-4 overflow-y-auto p-4">
+        <div className="space-y-4 rounded-lg border border-[#EBEBEB] p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-[#1A1A1A]">
             ✓ {homeRegion.name}, {homeRegion.capital}
@@ -230,8 +231,9 @@ export default function ShippingConfigStep({
           <span>{error}</span>
         </div>
       )}
+      </div>
 
-      <div className="flex items-center gap-3 pt-1">
+      <div className="flex shrink-0 items-center gap-3 px-4 pb-4 pt-2">
         {onBack && <BackCircleButton onClick={onBack} />}
         {onCancel && (
           <button
