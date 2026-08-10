@@ -278,7 +278,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
                 </span>
               </div>
             )}
-            <div className="flex justify-between gap-3 border-gray-200 pt-2">
+            <div className="flex justify-between gap-3 pt-2">
               <span className="text-muted-foreground">Frais de livraison</span>
               <span className="font-medium text-right">
                 {order.shipping_fee.toLocaleString('fr-FR')} FCFA
@@ -308,7 +308,7 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
               <span className="text-muted-foreground">Région</span>
               <span className="font-medium text-right">{order.shipping_region_id}</span>
             </div>
-            <div className="flex justify-between gap-3 border-gray-200 pt-2">
+            <div className="flex justify-between gap-3 pt-2">
               <span className="text-muted-foreground">Total</span>
               <span className="font-semibold text-right">
                 {(itemsTotal + order.shipping_fee).toLocaleString('fr-FR')} FCFA
@@ -316,7 +316,56 @@ export default function OrderDetail({ orderId }: OrderDetailProps) {
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-gray-200 pt-4">
+          {/* Payment section */}
+          <div className="space-y-2 text-sm pt-4">
+            <h2 className="pb-1 text-base font-semibold text-foreground">Paiement</h2>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Mode</span>
+              <span>
+                {order.payment_method === 'CARD' ? (
+                  <span className="inline-flex items-center rounded-full border border-transparent bg-violet-100 px-2.5 py-0.5 text-xs font-semibold text-violet-700">
+                    Carte bancaire (Stripe)
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-transparent bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
+                    À la livraison
+                  </span>
+                )}
+              </span>
+            </div>
+            <div className="flex justify-between gap-3">
+              <span className="text-muted-foreground">Statut</span>
+              <span>
+                {order.payment_status === 'PAID' && (
+                  <span className="inline-flex items-center rounded-full border border-transparent bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+                    Payé ✓
+                  </span>
+                )}
+                {order.payment_status === 'UNPAID' && (
+                  <span className="inline-flex items-center rounded-full border border-transparent bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+                    Non payé
+                  </span>
+                )}
+                {order.payment_status === 'FAILED' && (
+                  <span className="inline-flex items-center rounded-full border border-transparent bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+                    Échec paiement
+                  </span>
+                )}
+                {order.payment_status === 'REFUNDED' && (
+                  <span className="inline-flex items-center rounded-full border border-transparent bg-gray-100 px-2.5 py-0.5 text-xs font-semibold text-gray-600">
+                    Remboursé
+                  </span>
+                )}
+              </span>
+            </div>
+            {order.payment_status === 'PAID' && order.payment_intent_id && (
+              <p className="text-xs text-muted-foreground break-all">
+                ID Stripe : {order.payment_intent_id}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-3 pt-4">
             <h2 className="text-base font-semibold text-foreground">Changement de statut</h2>
             {order.status_history.length > 0 && (
               <div className="space-y-0 rounded-lg border p-4">

@@ -145,6 +145,10 @@ export interface VendorOrder {
     region_id?: string;
     address_label?: string | null;
   };
+  payment_method: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER' | 'CARD';
+  payment_status: string;
+  payment_intent_id: string | null;
+  paid_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -174,7 +178,6 @@ export interface VendorOrderStatusHistoryEntry {
 }
 
 export interface VendorOrderDetail extends VendorOrder {
-  payment_method: 'CASH_ON_DELIVERY' | 'BANK_TRANSFER';
   shipping_region_id: string;
   shipping_method: 'PER_KM' | 'FIXED';
   shipping_distance_km: number | null;
